@@ -1,0 +1,37 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "github.com/disintegration/imaging",
+			"repository": "https://github.com/disintegration/imaging",
+			"revision": "d8bbae1de109b518dabc98c6c1633eb358c148a4",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/gosexy/exif",
+			"repository": "https://github.com/gosexy/exif",
+			"revision": "0164d9cdfc0e4be14837d319cfe205ef7ddd49a3",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/namsral/flag",
+			"repository": "https://github.com/namsral/flag",
+			"revision": "f5c14136b0990dacb8b9a579bd4a465df7fbe191",
+			"branch": "master"
+		},
+		{
+			"importpath": "golang.org/x/image/bmp",
+			"repository": "https://go.googlesource.com/image",
+			"revision": "97680175a5267bb8b31f1923e7a66df98013b11a",
+			"branch": "master",
+			"path": "/bmp"
+		},
+		{
+			"importpath": "golang.org/x/image/tiff",
+			"repository": "https://go.googlesource.com/image",
+			"revision": "97680175a5267bb8b31f1923e7a66df98013b11a",
+			"branch": "master",
+			"path": "/tiff"
+		}
+	]
+}
