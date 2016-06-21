@@ -2,9 +2,10 @@ package main
 
 import (
 	"image"
+	"time"
 
 	"github.com/disintegration/imaging"
-	"github.com/gosexy/exif"
+	"github.com/xiam/exif"
 )
 
 // FixOrientation modifies image in-place to match exif orientation data
@@ -49,4 +50,14 @@ func FixOrientation(path string, img *image.Image) (string, error) {
 	}
 
 	return orientation, err
+}
+
+func ImageTimeTaken(path string) (time.Time, error) {
+	reader := exif.New()
+	err := reader.Open(path)
+	if err == nil {
+		// DateTimeOriginal format 2011:06:04 08:56:22
+		if dateTimeOriginal, ok := reader.Tags["DateTimeOriginal"]; ok {
+		}
+	}
 }

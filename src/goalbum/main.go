@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -17,81 +16,26 @@ import (
 	"github.com/namsral/flag"
 )
 
-//go:generate go-bindata -pkg $GOPACKAGE -o assets.go -prefix "templates/" templates/ templates/js/ templates/css/ templates/css/default-skin/ templates/font/ templates/fonts/ templates/font/material-design-icons/ templates/font/roboto/ templates/fonts/roboto/
-
 // cli args
 var (
-	inFlag          = flag.String("in", "", "The input directory where images can be found")
-	outFlag         = flag.String("out", "", "The output directory where the static gallery will be generated")
-	updateFlag      = flag.Bool("update", false, "Update an existing gallery")
-	maxThumbFlag    = flag.Int("max-thumb", 300, "Maximum pixel dimension of thumbnail images")
-	maxSlideFlag    = flag.Int("max-slide", 1200, "Maximum pixel dimension of slide images")
-	headContentFlag = flag.String("head-content", "", "Path to file whose content should be included prior to the closing of the head element")
-	bodyContentFlag = flag.String("body-content", "", "Path to file whose content should be included prior to the closing of the body element")
-	includeFlag     = flag.String("include", "", "Comma separated list of files to include in document root of gallery")
-	titleFlag       = flag.String("title", "", "Title of album")
-	subtitleFlag    = flag.String("subtitle", "", "Subtitle of album")
-	colorFlag       = flag.String("color", "blue", "CSS colors to use")
+	inFlag       = flag.String("in", "", "The input directory where images can be found")
+	outFlag      = flag.String("out", "", "The output directory where the static gallery will be generated")
+	maxThumbFlag = flag.Int("max-thumb", 300, "Maximum pixel dimension of thumbnail images")
+	maxSlideFlag = flag.Int("max-slide", 1200, "Maximum pixel dimension of slide images")
+	titleFlag    = flag.String("title", "", "Title of album")
+	subtitleFlag = flag.String("subtitle", "", "Subtitle of album")
+	colorFlag    = flag.String("color", "blue", "CSS colors to use")
+	// TODO: future version
+	//updateFlag      = flag.Bool("update", false, "Update an existing gallery")
+	//headContentFlag = flag.String("head-content", "", "Path to file whose content should be included prior to the closing of the head element")
+	//bodyContentFlag = flag.String("body-content", "", "Path to file whose content should be included prior to the closing of the body element")
+	//includeFlag     = flag.String("include", "", "Comma separated list of files to include in document root of gallery")
 )
 
 var (
 	photos     []*Photo
 	indexTmpl  *template.Template
 	indexCtmpl = MustAsset("index.html.ctmpl")
-
-	staticAssets = []string{
-		"js/app.js",
-		"css/app.css",
-		"css/default-skin/default-skin.css",
-		"css/default-skin/preloader.gif",
-		"css/default-skin/default-skin.svg",
-		"css/default-skin/default-skin.png",
-		"font/material-design-icons/Material-Design-Icons.eot",
-		"font/material-design-icons/Material-Design-Icons.ttf",
-		"font/material-design-icons/Material-Design-Icons.woff",
-		"font/material-design-icons/Material-Design-Icons.woff2",
-		"font/material-design-icons/Material-Design-Icons.svg",
-		"font/roboto/Roboto-Medium.eot",
-		"font/roboto/Roboto-Regular.woff",
-		"font/roboto/Roboto-Regular.ttf",
-		"font/roboto/Roboto-Medium.woff",
-		"font/roboto/Roboto-Medium.ttf",
-		"font/roboto/Roboto-Bold.eot",
-		"font/roboto/Roboto-Bold.woff2",
-		"font/roboto/Roboto-Light.ttf",
-		"font/roboto/Roboto-Bold.woff",
-		"font/roboto/Roboto-Thin.eot",
-		"font/roboto/Roboto-Light.woff",
-		"font/roboto/Roboto-Thin.ttf",
-		"font/roboto/Roboto-Thin.woff2",
-		"font/roboto/Roboto-Light.woff2",
-		"font/roboto/Roboto-Regular.eot",
-		"font/roboto/Roboto-Light.eot",
-		"font/roboto/Roboto-Thin.woff",
-		"font/roboto/Roboto-Regular.woff2",
-		"font/roboto/Roboto-Bold.ttf",
-		"font/roboto/Roboto-Medium.woff2",
-		"fonts/roboto/Roboto-Medium.eot",
-		"fonts/roboto/Roboto-Regular.woff",
-		"fonts/roboto/Roboto-Regular.ttf",
-		"fonts/roboto/Roboto-Medium.woff",
-		"fonts/roboto/Roboto-Medium.ttf",
-		"fonts/roboto/Roboto-Bold.eot",
-		"fonts/roboto/Roboto-Bold.woff2",
-		"fonts/roboto/Roboto-Light.ttf",
-		"fonts/roboto/Roboto-Bold.woff",
-		"fonts/roboto/Roboto-Thin.eot",
-		"fonts/roboto/Roboto-Light.woff",
-		"fonts/roboto/Roboto-Thin.ttf",
-		"fonts/roboto/Roboto-Thin.woff2",
-		"fonts/roboto/Roboto-Light.woff2",
-		"fonts/roboto/Roboto-Regular.eot",
-		"fonts/roboto/Roboto-Light.eot",
-		"fonts/roboto/Roboto-Thin.woff",
-		"fonts/roboto/Roboto-Regular.woff2",
-		"fonts/roboto/Roboto-Bold.ttf",
-		"fonts/roboto/Roboto-Medium.woff2",
-	}
 )
 
 type Photo struct {
@@ -288,16 +232,9 @@ func main() {
 	w.Flush()
 
 	for _, staticAsset := range staticAssets {
-		absPath := path.Join(assetsDir, staticAsset)
-		dir := filepath.Dir(absPath)
-		err = os.MkdirAll(dir, 0755)
+		err = writeStaticAsset(assetsDir, staticAsset)
 		if err != nil {
-			fmt.Printf("Error creating static asset directory: %s\n", err.Error())
-			os.Exit(1)
-		}
-		err = ioutil.WriteFile(absPath, MustAsset(staticAsset), 0644)
-		if err != nil {
-			fmt.Printf("Error writing static asset: %s\n", err.Error())
+			fmt.Printf("Error writing static asset %s: %s\n", staticAsset, err.Error())
 			os.Exit(1)
 		}
 	}

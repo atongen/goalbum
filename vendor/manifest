@@ -8,15 +8,15 @@
 			"branch": "master"
 		},
 		{
-			"importpath": "github.com/gosexy/exif",
-			"repository": "https://github.com/gosexy/exif",
-			"revision": "0164d9cdfc0e4be14837d319cfe205ef7ddd49a3",
-			"branch": "master"
-		},
-		{
 			"importpath": "github.com/namsral/flag",
 			"repository": "https://github.com/namsral/flag",
 			"revision": "f5c14136b0990dacb8b9a579bd4a465df7fbe191",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/xiam/exif",
+			"repository": "https://github.com/xiam/exif",
+			"revision": "0164d9cdfc0e4be14837d319cfe205ef7ddd49a3",
 			"branch": "master"
 		},
 		{
