@@ -3,3 +3,10 @@
 
 /bin/*
 !/bin/.gitkeep
+
+/node_modules
+/assets/build
+
+/src/goalbum/assets.go
+/src/goalbum/templates/*
+!/src/goalbum/templates/index.html.ctmpl
