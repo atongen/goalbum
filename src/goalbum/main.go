@@ -83,6 +83,30 @@ func (photo *Photo) Filename() string {
 	return path.Base(photo.InPath)
 }
 
+func (photo1 *Photo) Update(photo2 *Photo) {
+	if photo1.OriginalWidth == 0 && photo2.OriginalWidth != 0 {
+		photo1.OriginalWidth = photo2.OriginalWidth
+	}
+	if photo1.OriginalHeight == 0 && photo2.OriginalHeight != 0 {
+		photo1.OriginalHeight = photo2.OriginalHeight
+	}
+	if photo1.SlideWidth == 0 && photo2.SlideWidth != 0 {
+		photo1.SlideWidth = photo2.SlideWidth
+	}
+	if photo1.SlideHeight == 0 && photo2.SlideHeight != 0 {
+		photo1.SlideHeight = photo2.SlideHeight
+	}
+	if photo1.ThumbWidth == 0 && photo2.ThumbWidth != 0 {
+		photo1.ThumbWidth = photo2.ThumbWidth
+	}
+	if photo1.ThumbHeight == 0 && photo2.ThumbHeight != 0 {
+		photo1.ThumbHeight = photo2.ThumbHeight
+	}
+	if photo1.Caption == "" && photo2.Caption != "" {
+		photo1.Caption = photo2.Caption
+	}
+}
+
 type ByCreatedAt []*Photo
 
 func (p ByCreatedAt) Len() int {
@@ -259,26 +283,34 @@ func IndexPhotos(path string) ([]*Photo, error) {
 		}
 		wg.Add(1)
 		go func(photoPath string) {
-			photo, err := PhotoMd5FromPath(photoPath)
+			photo, err := IndexPhoto(photoPath)
 			photoCh <- photoResult{photo, err}
 		}(path)
 		return nil
 	})
 
-	go func() {
+	quit := make(chan bool)
+
+	go func(inCh <-chan photoResult, doneCh <-chan bool) {
 		for {
-			result := <-photoCh
-			if result.err != nil {
-				fmt.Printf("Error indexing photo: %s\n", err.Error())
-				os.Exit(1)
+			select {
+			case result := <-inCh:
+				if result.err != nil {
+					fmt.Printf("Error indexing photo: %s\n", err.Error())
+					os.Exit(1)
+				}
+				photos = append(photos, result.photo)
+				wg.Done()
+			case <-doneCh:
+				return
 			}
-			photos = append(photos, result.photo)
-			wg.Done()
 		}
-	}()
+	}(photoCh, quit)
 
 	wg.Wait()
+	quit <- true
 	close(photoCh)
+	close(quit)
 
 	return photos, err
 }
@@ -291,16 +323,22 @@ func ResizePhotos(photos []*Photo) {
 
 	// start the workers
 	for i := 0; i < concurrency; i++ {
-		go ResizeWorker(photoCh, doneCh, errCh, &wg)
+		go ResizeWorker(i, photoCh, doneCh, errCh, &wg)
 	}
 
+	quit := make(chan bool)
+
 	// read from error channel
-	go func() {
+	go func(myErrCh <-chan error, myDoneCh <-chan bool) {
 		for {
-			err := <-errCh
-			fmt.Printf("Error resizing photo: %s", err.Error())
+			select {
+			case err := <-myErrCh:
+				fmt.Printf("Error resizing photo: %s\n", err.Error())
+			case <-myDoneCh:
+				return
+			}
 		}
-	}()
+	}(errCh, quit)
 
 	// send photos into worker pool
 	for _, photo := range photos {
@@ -309,9 +347,16 @@ func ResizePhotos(photos []*Photo) {
 	}
 
 	wg.Wait()
+	for i := 0; i < concurrency; i++ {
+		doneCh <- true
+	}
+	quit <- true
+	close(photoCh)
+	close(doneCh)
+	close(errCh)
 }
 
-func ResizeWorker(photoCh <-chan *Photo, doneCh <-chan bool, errCh chan<- error, wg *sync.WaitGroup) {
+func ResizeWorker(id int, photoCh <-chan *Photo, doneCh <-chan bool, errCh chan<- error, wg *sync.WaitGroup) {
 	for {
 		select {
 		case photo := <-photoCh:
@@ -401,7 +446,7 @@ func ResizePhoto(photo *Photo) error {
 	return nil
 }
 
-func PhotoMd5FromPath(inPath string) (*Photo, error) {
+func IndexPhoto(inPath string) (*Photo, error) {
 	absPath, err := filepath.Abs(inPath)
 	if err != nil {
 		return nil, err

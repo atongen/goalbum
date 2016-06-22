@@ -119,33 +119,29 @@ CheckPhotos:
 	return result
 }
 
-// Prefer dup from photos1
-// Ensure captions are preserved
 func PhotoUnion(photos1, photos2 []*Photo) []*Photo {
-	result := []*Photo{}
-	md5s := []string{}
-	captions := make(map[string]string)
+	md5s := make(map[string]*Photo)
 
 	for _, photos := range [][]*Photo{photos1, photos2} {
 		for _, photo := range photos {
-			if photo.Caption != "" {
-				if _, ok := captions[photo.Md5sum]; !ok {
-					captions[photo.Md5sum] = photo.Caption
-				}
-			}
-			if !SliceContainsString(md5s, photo.Md5sum) {
-				result = append(result, photo)
-				md5s = append(md5s, photo.Md5sum)
+			// make a copy of incoming photo struct
+			var newPhoto Photo = *photo
+			if oldPhoto, ok := md5s[newPhoto.Md5sum]; ok {
+				// we already have a reference to newphoto
+				// update the old reference
+				oldPhoto.Update(&newPhoto)
+			} else {
+				// store reference to newphoto
+				md5s[newPhoto.Md5sum] = &newPhoto
 			}
 		}
 	}
 
-	for _, photo := range result {
-		if val, ok := captions[photo.Md5sum]; ok {
-			if photo.Caption == "" {
-				photo.Caption = val
-			}
-		}
+	var result = make([]*Photo, len(md5s))
+	i := 0
+	for _, photo := range md5s {
+		result[i] = photo
+		i += 1
 	}
 
 	return result
