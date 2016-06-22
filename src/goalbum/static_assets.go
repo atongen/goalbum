@@ -68,7 +68,7 @@ var (
 func writeStaticAsset(assetsDir, staticAsset string) error {
 	absPath := path.Join(assetsDir, staticAsset)
 	dir := filepath.Dir(absPath)
-	err = os.MkdirAll(dir, 0755)
+	err := os.MkdirAll(dir, 0755)
 	if err != nil {
 		return err
 	}

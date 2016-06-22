@@ -2,13 +2,17 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
-	"image"
 	"image/jpeg"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
+	"sort"
 	"strings"
+	"sync"
 	"text/template"
 	"time"
 
@@ -18,45 +22,94 @@ import (
 
 // cli args
 var (
-	inFlag       = flag.String("in", "", "The input directory where images can be found")
-	outFlag      = flag.String("out", "", "The output directory where the static gallery will be generated")
-	maxThumbFlag = flag.Int("max-thumb", 300, "Maximum pixel dimension of thumbnail images")
-	maxSlideFlag = flag.Int("max-slide", 1200, "Maximum pixel dimension of slide images")
-	titleFlag    = flag.String("title", "", "Title of album")
-	subtitleFlag = flag.String("subtitle", "", "Subtitle of album")
-	colorFlag    = flag.String("color", "blue", "CSS colors to use")
-	// TODO: future version
-	//updateFlag      = flag.Bool("update", false, "Update an existing gallery")
-	//headContentFlag = flag.String("head-content", "", "Path to file whose content should be included prior to the closing of the head element")
-	//bodyContentFlag = flag.String("body-content", "", "Path to file whose content should be included prior to the closing of the body element")
-	//includeFlag     = flag.String("include", "", "Comma separated list of files to include in document root of gallery")
+	inFlag          = flag.String("in", "", "The input directory where images can be found")
+	outFlag         = flag.String("out", "", "The output directory where the static gallery will be generated")
+	maxThumbFlag    = flag.Int("max-thumb", 300, "Maximum pixel dimension of thumbnail images")
+	maxSlideFlag    = flag.Int("max-slide", 1200, "Maximum pixel dimension of slide images")
+	titleFlag       = flag.String("title", "", "Title of album")
+	subtitleFlag    = flag.String("subtitle", "", "Subtitle of album")
+	colorFlag       = flag.String("color", "blue", "CSS colors to use")
+	headContentFlag = flag.String("head-content", "", "Path to file whose content should be included prior to the closing of the head element")
+	bodyContentFlag = flag.String("body-content", "", "Path to file whose content should be included prior to the closing of the body element")
+	includeFlag     strslice
+	appendFlag      = flag.Bool("append", false, "If updating a gallery, append images instead of replace")
 )
 
 var (
-	photos     []*Photo
 	indexTmpl  *template.Template
 	indexCtmpl = MustAsset("index.html.ctmpl")
+
+	originalsDirName = "originals"
+	slidesDirName    = "slides"
+	thumbsDirName    = "thumbs"
+	assetsDirName    = "assets"
+
+	originalsDir string
+	slidesDir    string
+	thumbsDir    string
+	assetsDir    string
+
+	concurrency = runtime.NumCPU()
 )
 
+type strslice []string
+
+func (s *strslice) String() string {
+	return fmt.Sprintf("%s", *s)
+}
+
+func (s *strslice) Set(value string) error {
+	*s = append(*s, value)
+	return nil
+}
+
 type Photo struct {
-	Id          string
-	Path        string
-	Width       int
-	Height      int
-	SlideWidth  int
-	SlideHeight int
-	ThumbWidth  int
-	ThumbHeight int
-	Caption     string
-	CreatedAt   time.Time
+	InPath         string
+	Md5sum         string
+	OriginalPath   string
+	OriginalWidth  int
+	OriginalHeight int
+	SlidePath      string
+	SlideWidth     int
+	SlideHeight    int
+	ThumbPath      string
+	ThumbWidth     int
+	ThumbHeight    int
+	Caption        string
+	CreatedAt      time.Time
+}
+
+func (photo *Photo) Filename() string {
+	return path.Base(photo.InPath)
+}
+
+type ByCreatedAt []*Photo
+
+func (p ByCreatedAt) Len() int {
+	return len(p)
+}
+
+func (p ByCreatedAt) Swap(i, j int) {
+	p[i], p[j] = p[j], p[i]
+}
+
+func (p ByCreatedAt) Less(i, j int) bool {
+	return p[i].CreatedAt.Before(p[j].CreatedAt)
+}
+
+type photoResult struct {
+	photo *Photo
+	err   error
 }
 
 type Page struct {
-	Title     string
-	Subtitle  string
-	Photos    []*Photo
-	CreatedAt string
-	Color     string
+	Title       string
+	Subtitle    string
+	Photos      []*Photo
+	CreatedAt   string
+	Color       string
+	HeadContent string
+	BodyContent string
 }
 
 func init() {
@@ -69,6 +122,8 @@ func init() {
 		fmt.Printf("Invalid index template: %s\n", err.Error())
 		os.Exit(1)
 	}
+
+	flag.Var(&includeFlag, "include", "File to include in document root of gallery")
 }
 
 func main() {
@@ -84,46 +139,48 @@ func main() {
 		os.Exit(1)
 	}
 
-	err := filepath.Walk(*inFlag, func(path string, info os.FileInfo, err error) error {
+	originalsDir = path.Join(*outFlag, originalsDirName)
+	slidesDir = path.Join(*outFlag, slidesDirName)
+	thumbsDir = path.Join(*outFlag, thumbsDirName)
+	assetsDir = path.Join(*outFlag, assetsDirName)
+
+	// attempt to parse existing photos.json file
+	var existingPhotos []*Photo
+	photoJsonPath := path.Join(*outFlag, "photos.json")
+	photosBlob, err := ioutil.ReadFile(photoJsonPath)
+	if os.IsNotExist(err) {
+		existingPhotos = []*Photo{}
+	} else {
+		err = json.Unmarshal(photosBlob, &existingPhotos)
 		if err != nil {
-			return err
+			fmt.Printf("Error parsing existing photo data: %s\n", err.Error())
+			os.Exit(1)
 		}
-		if !info.Mode().IsRegular() {
-			return nil
-		}
-		ext := strings.ToLower(filepath.Ext(path))
-		if ext != ".jpg" {
-			return nil
-		}
-		photo, err := newPhotoFromPath(path)
-		if err != nil {
-			return err
-		}
-		photos = append(photos, photo)
-		return nil
-	})
+	}
+
+	var photos []*Photo
+	photos, err = IndexPhotos(*inFlag)
 
 	if err != nil {
-		fmt.Printf("Error getting image list: %s\n", err.Error())
+		fmt.Printf("Error indexing photos: %s\n", err.Error())
 		os.Exit(1)
 	}
 
-	if len(photos) == 0 {
-		fmt.Println("No photos found")
-		os.Exit(1)
+	photosToAdd := PhotoSliceSubtract(photos, existingPhotos)
+	var photosToRm []*Photo
+	if *appendFlag {
+		// we are appending to existing gallery
+		photos = PhotoUnion(photos, existingPhotos)
+		photosToRm = []*Photo{}
+	} else {
+		// we are replacing existing gallery
+		photos = PhotoRemoveDuplicates(photos)
+		photosToRm = PhotoSliceSubtract(existingPhotos, photos)
 	}
 
-	err = os.MkdirAll(*outFlag, 0755)
-	if err != nil {
-		fmt.Printf("Error creating out directory: %s\n", err.Error())
-		os.Exit(1)
-	}
+	sort.Sort(ByCreatedAt(photos))
 
-	originalsDir := path.Join(*outFlag, "originals")
-	slidesDir := path.Join(*outFlag, "slides")
-	thumbsDir := path.Join(*outFlag, "thumbs")
-	assetsDir := path.Join(*outFlag, "assets")
-
+	// create out directories
 	for _, dir := range []string{originalsDir, slidesDir, thumbsDir, assetsDir} {
 		err := os.MkdirAll(dir, 0755)
 		if err != nil {
@@ -132,87 +189,19 @@ func main() {
 		}
 	}
 
-	for _, photo := range photos {
-		fmt.Println(photo.Path)
-		file, err := os.Open(photo.Path)
-		if err != nil {
-			fmt.Printf("Error opening image: %+v, %s\n", photo, err.Error())
-			os.Exit(1)
+	// remove obsolete photos in out directories
+	for _, photo := range photosToRm {
+		for _, dir := range []string{originalsDir, slidesDir, thumbsDir} {
+			photoPath := path.Join(dir, photo.Filename())
+			err = os.Remove(photoPath)
+			if err != nil {
+				fmt.Printf("Error removing old photo %s: %s\n", photoPath, err.Error())
+				os.Exit(1)
+			}
 		}
-
-		// decode jpeg into image.Image
-		img, err := jpeg.Decode(file)
-		if err != nil {
-			fmt.Printf("Error decoding image: %+v, %s\n", photo, err.Error())
-			os.Exit(1)
-		}
-		file.Close()
-
-		// fix orientation
-		_, err = FixOrientation(photo.Path, &img)
-
-		// write original image
-		original, err := os.Create(path.Join(originalsDir, photo.Id+".jpg"))
-		if err != nil {
-			fmt.Printf("Error creating original image: %+v, %s\n", photo, err.Error())
-			os.Exit(1)
-		}
-
-		err = jpeg.Encode(original, img, nil)
-		if err != nil {
-			fmt.Printf("Error encoding original image: %+v, %s\n", photo, err.Error())
-			os.Exit(1)
-		}
-		err = original.Close()
-		if err != nil {
-			fmt.Printf("Error closing original image: %+v, %s\n", photo, err.Error())
-			os.Exit(1)
-		}
-
-		// write slide image
-		slideImg := imaging.Fit(img, *maxSlideFlag, *maxSlideFlag, imaging.Lanczos)
-
-		slide, err := os.Create(path.Join(slidesDir, photo.Id+".jpg"))
-		if err != nil {
-			fmt.Printf("Error creating slide image: %+v, %s\n", photo, err.Error())
-			os.Exit(1)
-		}
-
-		err = jpeg.Encode(slide, slideImg, nil)
-		if err != nil {
-			fmt.Printf("Error encoding slide image: %+v, %s\n", photo, err.Error())
-			os.Exit(1)
-		}
-		err = slide.Close()
-		if err != nil {
-			fmt.Printf("Error closing slide image: %+v, %s\n", photo, err.Error())
-			os.Exit(1)
-		}
-		photo.SlideWidth = slideImg.Bounds().Dx()
-		photo.SlideHeight = slideImg.Bounds().Dy()
-
-		// write thumb image
-		thumbImg := imaging.Fit(img, *maxThumbFlag, *maxThumbFlag, imaging.Lanczos)
-
-		thumb, err := os.Create(path.Join(thumbsDir, photo.Id+".jpg"))
-		if err != nil {
-			fmt.Printf("Error creating thumb image: %+v, %s\n", photo, err.Error())
-			os.Exit(1)
-		}
-
-		err = jpeg.Encode(thumb, thumbImg, nil)
-		if err != nil {
-			fmt.Printf("Error encoding thumb image: %+v, %s\n", photo, err.Error())
-			os.Exit(1)
-		}
-		err = thumb.Close()
-		if err != nil {
-			fmt.Printf("Error closing thumb image: %+v, %s\n", photo, err.Error())
-			os.Exit(1)
-		}
-		photo.ThumbWidth = thumbImg.Bounds().Dx()
-		photo.ThumbHeight = thumbImg.Bounds().Dy()
 	}
+
+	ResizePhotos(photosToAdd)
 
 	f, err := os.Create(path.Join(*outFlag, "index.html"))
 	if err != nil {
@@ -238,41 +227,199 @@ func main() {
 			os.Exit(1)
 		}
 	}
-}
 
-func imageDims(path string) (int, int, error) {
-	file, err := os.Open(path)
+	data, err := json.MarshalIndent(photos, "", "    ")
 	if err != nil {
-		return 0, 0, err
+		fmt.Printf("Error converting photos json: %s\n", err.Error())
+		os.Exit(1)
 	}
 
-	image, _, err := image.DecodeConfig(file)
+	err = ioutil.WriteFile(photoJsonPath, data, 0644)
 	if err != nil {
-		return 0, 0, err
+		fmt.Printf("Error writing photos json: %s\n", err.Error())
+		os.Exit(1)
 	}
-	return image.Width, image.Height, nil
 }
 
-func newPhotoFromPath(inPath string) (*Photo, error) {
+func IndexPhotos(path string) ([]*Photo, error) {
+	photos := []*Photo{}
+	var wg sync.WaitGroup
+	photoCh := make(chan photoResult)
+
+	err := filepath.Walk(*inFlag, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.Mode().IsRegular() {
+			return nil
+		}
+		ext := strings.ToLower(filepath.Ext(path))
+		if ext != ".jpg" {
+			return nil
+		}
+		wg.Add(1)
+		go func(photoPath string) {
+			photo, err := PhotoMd5FromPath(photoPath)
+			photoCh <- photoResult{photo, err}
+		}(path)
+		return nil
+	})
+
+	go func() {
+		for {
+			result := <-photoCh
+			if result.err != nil {
+				fmt.Printf("Error indexing photo: %s\n", err.Error())
+				os.Exit(1)
+			}
+			photos = append(photos, result.photo)
+			wg.Done()
+		}
+	}()
+
+	wg.Wait()
+	close(photoCh)
+
+	return photos, err
+}
+
+func ResizePhotos(photos []*Photo) {
+	photoCh := make(chan *Photo, concurrency)
+	doneCh := make(chan bool)
+	errCh := make(chan error)
+	var wg sync.WaitGroup
+
+	// start the workers
+	for i := 0; i < concurrency; i++ {
+		go ResizeWorker(photoCh, doneCh, errCh, &wg)
+	}
+
+	// read from error channel
+	go func() {
+		for {
+			err := <-errCh
+			fmt.Printf("Error resizing photo: %s", err.Error())
+		}
+	}()
+
+	// send photos into worker pool
+	for _, photo := range photos {
+		wg.Add(1)
+		photoCh <- photo
+	}
+
+	wg.Wait()
+}
+
+func ResizeWorker(photoCh <-chan *Photo, doneCh <-chan bool, errCh chan<- error, wg *sync.WaitGroup) {
+	for {
+		select {
+		case photo := <-photoCh:
+			err := ResizePhoto(photo)
+			if err != nil {
+				errCh <- err
+			}
+			wg.Done()
+		case <-doneCh:
+			return
+		}
+	}
+}
+
+func ResizePhoto(photo *Photo) error {
+	fmt.Println(photo.Filename())
+	file, err := os.Open(photo.InPath)
+	if err != nil {
+		return err
+	}
+
+	// decode jpeg into image.Image
+	img, err := jpeg.Decode(file)
+	if err != nil {
+		return err
+	}
+	file.Close()
+
+	// fix orientation
+	_, err = FixOrientation(photo.InPath, &img)
+
+	// write original image
+	original, err := os.Create(path.Join(originalsDir, photo.Filename()))
+	if err != nil {
+		return err
+	}
+
+	err = jpeg.Encode(original, img, nil)
+	if err != nil {
+		return err
+	}
+	err = original.Close()
+	if err != nil {
+		return err
+	}
+	photo.OriginalWidth = img.Bounds().Dx()
+	photo.OriginalHeight = img.Bounds().Dy()
+
+	// write slide image
+	slideImg := imaging.Fit(img, *maxSlideFlag, *maxSlideFlag, imaging.Lanczos)
+
+	slide, err := os.Create(path.Join(slidesDir, photo.Filename()))
+	if err != nil {
+		return err
+	}
+
+	err = jpeg.Encode(slide, slideImg, nil)
+	if err != nil {
+		return err
+	}
+	err = slide.Close()
+	if err != nil {
+		return err
+	}
+	photo.SlideWidth = slideImg.Bounds().Dx()
+	photo.SlideHeight = slideImg.Bounds().Dy()
+
+	// write thumb image
+	thumbImg := imaging.Fit(img, *maxThumbFlag, *maxThumbFlag, imaging.Lanczos)
+
+	thumb, err := os.Create(path.Join(thumbsDir, photo.Filename()))
+	if err != nil {
+		return err
+	}
+
+	err = jpeg.Encode(thumb, thumbImg, nil)
+	if err != nil {
+		return err
+	}
+	err = thumb.Close()
+	if err != nil {
+		return err
+	}
+	photo.ThumbWidth = thumbImg.Bounds().Dx()
+	photo.ThumbHeight = thumbImg.Bounds().Dy()
+
+	return nil
+}
+
+func PhotoMd5FromPath(inPath string) (*Photo, error) {
 	absPath, err := filepath.Abs(inPath)
 	if err != nil {
 		return nil, err
 	}
 
-	w, h, err := imageDims(absPath)
+	filename := path.Base(absPath)
+
+	md5sum, err := Md5sumFromPath(absPath)
 	if err != nil {
 		return nil, err
 	}
 
-	base := path.Base(inPath)
-	ext := filepath.Ext(base)
-	id := base[0 : len(base)-len(ext)]
-
 	return &Photo{
-		Id:        id,
-		Path:      absPath,
-		Width:     w,
-		Height:    h,
-		CreatedAt: time.Now(), // TODO: exif
+		InPath:       absPath,
+		Md5sum:       md5sum,
+		OriginalPath: path.Join(originalsDirName, filename),
+		SlidePath:    path.Join(slidesDirName, filename),
+		ThumbPath:    path.Join(thumbsDirName, filename),
+		CreatedAt:    ImageTimeTaken(absPath),
 	}, nil
 }
