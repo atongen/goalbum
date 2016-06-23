@@ -32,7 +32,7 @@ var (
 	headContentFlag = flag.String("head-content", "", "Path to file whose content should be included prior to the closing of the head element")
 	bodyContentFlag = flag.String("body-content", "", "Path to file whose content should be included prior to the closing of the body element")
 	includeFlag     strslice
-	appendFlag      = flag.Bool("append", false, "If updating a gallery, append images instead of replace")
+	updateFlag      = flag.Bool("update", false, "If output directory is existing gallery, update instead of replace")
 )
 
 var (
@@ -61,64 +61,6 @@ func (s *strslice) String() string {
 func (s *strslice) Set(value string) error {
 	*s = append(*s, value)
 	return nil
-}
-
-type Photo struct {
-	InPath         string
-	Md5sum         string
-	OriginalPath   string
-	OriginalWidth  int
-	OriginalHeight int
-	SlidePath      string
-	SlideWidth     int
-	SlideHeight    int
-	ThumbPath      string
-	ThumbWidth     int
-	ThumbHeight    int
-	Caption        string
-	CreatedAt      time.Time
-}
-
-func (photo *Photo) Filename() string {
-	return path.Base(photo.InPath)
-}
-
-func (photo1 *Photo) Update(photo2 *Photo) {
-	if photo1.OriginalWidth == 0 && photo2.OriginalWidth != 0 {
-		photo1.OriginalWidth = photo2.OriginalWidth
-	}
-	if photo1.OriginalHeight == 0 && photo2.OriginalHeight != 0 {
-		photo1.OriginalHeight = photo2.OriginalHeight
-	}
-	if photo1.SlideWidth == 0 && photo2.SlideWidth != 0 {
-		photo1.SlideWidth = photo2.SlideWidth
-	}
-	if photo1.SlideHeight == 0 && photo2.SlideHeight != 0 {
-		photo1.SlideHeight = photo2.SlideHeight
-	}
-	if photo1.ThumbWidth == 0 && photo2.ThumbWidth != 0 {
-		photo1.ThumbWidth = photo2.ThumbWidth
-	}
-	if photo1.ThumbHeight == 0 && photo2.ThumbHeight != 0 {
-		photo1.ThumbHeight = photo2.ThumbHeight
-	}
-	if photo1.Caption == "" && photo2.Caption != "" {
-		photo1.Caption = photo2.Caption
-	}
-}
-
-type ByCreatedAt []*Photo
-
-func (p ByCreatedAt) Len() int {
-	return len(p)
-}
-
-func (p ByCreatedAt) Swap(i, j int) {
-	p[i], p[j] = p[j], p[i]
-}
-
-func (p ByCreatedAt) Less(i, j int) bool {
-	return p[i].CreatedAt.Before(p[j].CreatedAt)
 }
 
 type photoResult struct {
@@ -190,10 +132,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	if len(existingPhotos) > 0 {
+		PhotoUpdate(photos, existingPhotos)
+	}
+
 	photosToAdd := PhotoSliceSubtract(photos, existingPhotos)
 	var photosToRm []*Photo
-	if *appendFlag {
-		// we are appending to existing gallery
+	if *updateFlag {
+		// we are updating an existing gallery
 		photos = PhotoUnion(photos, existingPhotos)
 		photosToRm = []*Photo{}
 	} else {
@@ -203,6 +149,10 @@ func main() {
 	}
 
 	sort.Sort(ByCreatedAt(photos))
+
+	for _, photo := range photos {
+		photo.SetDefaultCaption()
+	}
 
 	// create out directories
 	for _, dir := range []string{originalsDir, slidesDir, thumbsDir, assetsDir} {
@@ -236,11 +186,13 @@ func main() {
 
 	w := bufio.NewWriter(f)
 	indexTmpl.Execute(w, Page{
-		Title:     *titleFlag,
-		Subtitle:  *subtitleFlag,
-		Photos:    photos,
-		CreatedAt: time.Now().Format("Monday, January 2, 2006"),
-		Color:     *colorFlag,
+		Title:       *titleFlag,
+		Subtitle:    *subtitleFlag,
+		Photos:      photos,
+		CreatedAt:   time.Now().Format("Monday, January 2, 2006"),
+		Color:       *colorFlag,
+		HeadContent: *headContentFlag,
+		BodyContent: *bodyContentFlag,
 	})
 	w.Flush()
 
@@ -262,6 +214,15 @@ func main() {
 	if err != nil {
 		fmt.Printf("Error writing photos json: %s\n", err.Error())
 		os.Exit(1)
+	}
+
+	for _, includePath := range includeFlag {
+		dst := path.Join(*outFlag, path.Base(includePath))
+		err = CopyFile(dst, includePath)
+		if err != nil {
+			fmt.Printf("Error writing photos json: %s\n", err.Error())
+			os.Exit(1)
+		}
 	}
 }
 
@@ -386,7 +347,12 @@ func ResizePhoto(photo *Photo) error {
 	file.Close()
 
 	// fix orientation
-	_, err = FixOrientation(photo.InPath, &img)
+	orientation, err := GetOrientation(photo.InPath)
+	if err == nil {
+		FixOrientation(&img, orientation)
+	} else {
+		fmt.Println("orientation error", photo.InPath, err.Error())
+	}
 
 	// write original image
 	original, err := os.Create(path.Join(originalsDir, photo.Filename()))

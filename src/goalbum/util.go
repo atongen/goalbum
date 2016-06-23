@@ -4,72 +4,99 @@ import (
 	"crypto/md5"
 	"fmt"
 	"image"
+	"io"
 	"io/ioutil"
 	"os"
 	"time"
 
 	"github.com/disintegration/imaging"
-	"github.com/xiam/exif"
+	"github.com/rwcarlsen/goexif/exif"
 )
+
+func GetOrientation(path string) (int, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return 0, err
+	}
+
+	x, err := exif.Decode(f)
+	if err != nil {
+		return 0, err
+	}
+
+	orientation, err := x.Get(exif.Orientation)
+	if err != nil {
+		return 0, err
+	}
+
+	val, err := orientation.Int(0)
+	if err != nil {
+		return 0, err
+	}
+
+	return val, nil
+}
 
 // FixOrientation modifies image in-place to match exif orientation data
 // http://sylvana.net/jpegcrop/exif_orientation.html
-func FixOrientation(path string, img *image.Image) (string, error) {
-	orientation := ""
-	reader := exif.New()
-	err := reader.Open(path)
-	if err == nil {
-		if orientation, ok := reader.Tags["Orientation"]; ok {
-			switch orientation {
-			case "Top-left":
-				// 1
-			case "Top-right":
-				// 2 flop!
-				*img = imaging.FlipH(*img)
-			case "Bottom-right":
-				// 3 rotate!(180)
-				*img = imaging.Rotate180(*img)
-			case "Bottom-left":
-				// 4 flip!
-				*img = imaging.FlipV(*img)
-			case "Left-top":
-				// 5 transpose!
-				*img = imaging.Rotate270(*img)
-				*img = imaging.FlipH(*img)
-			case "Right-top":
-				// 6 rotate!(90)
-				*img = imaging.Rotate270(*img)
-			case "Right-bottom":
-				// 7 transverse!
-				*img = imaging.Rotate90(*img)
-				*img = imaging.FlipH(*img)
-			case "Left-bottom":
-				// 8 rotate!(270)
-				*img = imaging.Rotate90(*img)
-			}
-		}
+func FixOrientation(img *image.Image, orientation int) error {
+	switch orientation {
+	case 1:
+		// do nothing
+	case 2:
+		// flop!
+		*img = imaging.FlipH(*img)
+	case 3:
+		// rotate!(180)
+		*img = imaging.Rotate180(*img)
+	case 4:
+		// flip!
+		*img = imaging.FlipV(*img)
+	case 5:
+		// transpose!
+		*img = imaging.Rotate270(*img)
+		*img = imaging.FlipH(*img)
+	case 6:
+		// rotate!(90)
+		*img = imaging.Rotate270(*img)
+	case 7:
+		// transverse!
+		*img = imaging.Rotate90(*img)
+		*img = imaging.FlipH(*img)
+	case 8:
+		// rotate!(270)
+		*img = imaging.Rotate90(*img)
+	default:
+		return fmt.Errorf("Invalid orientation %d", orientation)
 	}
-	if orientation == "" {
-		orientation = "Top-left"
-	}
-
-	return orientation, err
+	return nil
 }
 
 func ImageTimeTaken(path string) time.Time {
-	reader := exif.New()
-	err := reader.Open(path)
+	f, err := os.Open(path)
+	if err != nil {
+		return time.Now()
+	}
+
+	var timeTaken time.Time
+
+	x, err := exif.Decode(f)
 	if err == nil {
-		// DateTimeOriginal format 2011:06:04 08:56:22
-		if val, ok := reader.Tags["DateTimeOriginal"]; ok {
-			fmt.Println(val)
+		timeTaken, _ = x.DateTime()
+	}
+
+	if timeTaken.IsZero() {
+		fi, err := f.Stat()
+		if err == nil {
+			timeTaken = fi.ModTime()
 		}
 	}
-	f, err := os.Stat(path)
-	if err != nil {
-		return f.ModTime()
+
+	if timeTaken.IsZero() {
+		timeTaken = time.Now()
 	}
-	return time.Now()
+
+	return timeTaken
 }
 
 func Md5sumFromPath(path string) (string, error) {
@@ -119,30 +146,49 @@ CheckPhotos:
 	return result
 }
 
+func PhotoUpdate(photos1, photos2 []*Photo) {
+	for _, photo1 := range photos1 {
+		for _, photo2 := range photos2 {
+			if photo1.Md5sum == photo2.Md5sum {
+				photo1.Update(photo2)
+			}
+		}
+	}
+}
+
 func PhotoUnion(photos1, photos2 []*Photo) []*Photo {
-	md5s := make(map[string]*Photo)
+	result := []*Photo{}
+	md5s := []string{}
 
 	for _, photos := range [][]*Photo{photos1, photos2} {
 		for _, photo := range photos {
-			// make a copy of incoming photo struct
-			var newPhoto Photo = *photo
-			if oldPhoto, ok := md5s[newPhoto.Md5sum]; ok {
-				// we already have a reference to newphoto
-				// update the old reference
-				oldPhoto.Update(&newPhoto)
-			} else {
-				// store reference to newphoto
-				md5s[newPhoto.Md5sum] = &newPhoto
+			if !SliceContainsString(md5s, photo.Md5sum) {
+				result = append(result, photo)
+				md5s = append(md5s, photo.Md5sum)
 			}
 		}
 	}
 
-	var result = make([]*Photo, len(md5s))
-	i := 0
-	for _, photo := range md5s {
-		result[i] = photo
-		i += 1
-	}
-
 	return result
+}
+
+func CopyFile(dst, src string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, in)
+	cerr := out.Close()
+	if err != nil {
+		return err
+	}
+	return cerr
 }

@@ -14,10 +14,10 @@
 			"branch": "master"
 		},
 		{
-			"importpath": "github.com/xiam/exif",
-			"repository": "https://github.com/xiam/exif",
-			"revision": "0164d9cdfc0e4be14837d319cfe205ef7ddd49a3",
-			"branch": "master"
+			"importpath": "github.com/rwcarlsen/goexif",
+			"repository": "https://github.com/rwcarlsen/goexif",
+			"revision": "709fab3d192d7c62f86043caff1e7e3fb0f42bd8",
+			"branch": "go1"
 		},
 		{
 			"importpath": "golang.org/x/image/bmp",

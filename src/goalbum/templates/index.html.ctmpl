@@ -7,18 +7,21 @@
   <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/app.css">
   <link rel="stylesheet" href="assets/css/default-skin/default-skin.css">
+  {{ if ne .HeadContent "" -}}
+  {{ .HeadContent }}
+  {{ end -}}
 </head>
 <body>
 	<div class="section no-pad-bot" id="index-banner">
     <div class="container">
       <br><br>
       <h1 class="header center {{.Color}}-text">{{.Title}}</h1>
-      {{if ne .Subtitle ""}}
+      {{ if ne .Subtitle "" -}}
       <div class="row center">
         <h5 class="header col s12 light">{{.Subtitle}}</h5>
       </div>
       <br><br>
-      {{end}}
+      {{ end -}}
     </div>
   </div>
 	<div class="container">
@@ -28,7 +31,7 @@
 					<!-- begin gallery -->
 					<div class="gallery" itemscope itemtype="http://schema.org/ImageGallery">
 						{{ range .Photos -}}
-            <div class="cell" style="width: {{.ThumbWidth}}px; height: {{.ThumbHeight}}px" data-size="{{.SlideWidth}}x{{.SlideHeight}}" data-original="{{.OriginalPath}}" data-caption="{{.Caption}}" itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject">
+            <div class="cell" style="width: {{.ThumbWidth}}px; height: {{.ThumbHeight}}px" data-size="{{.SlideWidth}}x{{.SlideHeight}}" data-msrc="{{.ThumbPath}}" data-original="{{.OriginalPath}}" data-caption="{{.Caption}}" data-author="{{.Author}}" itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject">
               <a href="{{.OriginalPath}}" style="background-image: url({{.ThumbPath}})" itemprop="contentUrl">
 								{{.Filename}}
 							</a>
@@ -82,10 +85,13 @@
   <footer class="page-footer {{.Color}}">
     <div class="footer-copyright">
       <div class="container">
-        Album Generated at {{.CreatedAt}} by <a class="{{.Color}}-text text-lighten-3" href="http://github.com/atongen/goalbum">goalbum</a>
+        Album Generated on {{.CreatedAt}} by <a class="{{.Color}}-text text-lighten-3" href="http://github.com/atongen/goalbum">goalbum</a>
       </div>
     </div>
   </footer>
   <script src="assets/js/app.js"></script>
+  {{ if ne .BodyContent "" -}}
+  {{ .BodyContent}}
+  {{ end -}}
 </body>
 </html>
