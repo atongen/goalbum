@@ -20,6 +20,7 @@ type Photo struct {
 	ThumbHeight    int
 	Caption        string
 	Author         string
+	Tags           []string
 	CreatedAt      time.Time
 }
 
@@ -51,6 +52,9 @@ func (photo1 *Photo) Update(photo2 *Photo) {
 	}
 	if photo1.Author == "" && photo2.Author != "" {
 		photo1.Author = photo2.Author
+	}
+	if len(photo1.Tags) == 0 && len(photo2.Tags) > 0 {
+		photo1.Tags = photos.Tags
 	}
 }
 
