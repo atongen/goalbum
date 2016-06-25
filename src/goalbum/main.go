@@ -368,7 +368,6 @@ func ResizeWorker(id int, photoCh <-chan *Photo, doneCh <-chan bool, errCh chan<
 }
 
 func ResizePhoto(photo *Photo) error {
-	fmt.Println(photo.Filename())
 	file, err := os.Open(photo.InPath)
 	if err != nil {
 		return err
