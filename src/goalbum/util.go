@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/disintegration/imaging"
@@ -191,4 +192,44 @@ func CopyFile(dst, src string) error {
 		return err
 	}
 	return cerr
+}
+
+func PhotoTags(photos []*Photo) map[string]string {
+	tags := make(map[string]string)
+
+	var i int = 0
+	for _, photo := range photos {
+		for _, tag := range photo.Tags {
+			if _, ok := tags[tag]; !ok {
+				tags[tag] = "tag-" + strconv.Itoa(i)
+				i += 1
+			}
+		}
+	}
+
+	return tags
+}
+
+func SetTagNames(photos []*Photo, tags map[string]string) {
+	for _, photo := range photos {
+		if len(photo.Tags) > 0 {
+			tagNames := make([]string, len(photo.Tags))
+			for i, tag := range photo.Tags {
+				tagNames[i] = tags[tag]
+			}
+			photo.TagNames = tagNames
+		}
+	}
+}
+
+func MapKeys(myMap map[string]string) []string {
+	keys := make([]string, len(myMap))
+
+	var i int = 0
+	for key, _ := range myMap {
+		keys[i] = key
+		i += 1
+	}
+
+	return keys
 }

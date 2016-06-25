@@ -71,10 +71,11 @@ module.exports = function(grunt) {
         uglify: {
             options: {
                 mangle: production,
-                compress: production,
+                //compress: production,
+                compress: false,
                 beautify: !production,
                 sourceMap: !production,
-                preserveComments: false,
+                preserveComments: !production,
                 screwIE8: true
             },
             main: {

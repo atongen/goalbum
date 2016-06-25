@@ -1,6 +1,15 @@
-var openGallery = function(index) {
+var indexOfObjAttr = function(arr, attr, value) {
+    for (var i = 0; i < arr.length; i += 1) {
+        if (arr[i][attr] === value) {
+            return i;
+        }
+    }
+}
+
+var openGallery = function(id, selector) {
     var gallery;
-    var items = parseItems();
+    var items = parseItems(selector);
+    var index = indexOfObjAttr(items, 'pid', id);
     var $pswp = $('.pswp')[0];
 
     var options = {
@@ -8,6 +17,7 @@ var openGallery = function(index) {
         bgOpacity: 0.7,
         showHideOpacity: true,
         history: true,
+        galleryPIDs: true,
         getImageURLForShare: function() {
             var slideSrc = gallery.currItem.src;
             var filename = slideSrc.split('/')[1];
@@ -42,11 +52,12 @@ var openGallery = function(index) {
     gallery.init();
 }
 
-var parseItems = function() {
+var parseItems = function(selector) {
     var items = [];
-    $('.cell').each(function() {
+    $(selector).each(function() {
         var $size = $(this).data('size').split('x');
         items.push({
+            pid: $(this).data('photo-id'),
             src: $(this).find('a').attr('href'),
             msrc: $(this).data('msrc'),
             w: $size[0],
@@ -86,8 +97,10 @@ var photoswipeParseHash = function() {
 	return params;
 };
 
-$(function() {
-    var wall = new Freewall(".gallery");
+var wall;
+var cellSelector;
+var loadWall = function() {
+    wall = new Freewall(".gallery");
     wall.reset({
         animate: true,
         onResize: function() {
@@ -95,17 +108,37 @@ $(function() {
         }
     })
     wall.fitWidth();
-    // for scroll bar appear
     $(window).trigger("resize");
+}
+
+$(function() {
+    loadWall();
+
+    cellSelector = '.cell';
+
+    $('.tag-check').on('click', function(event) {
+        var checkedTags = $('.tag-check:checked').map(function() {
+            return $(this).val();
+        }).get();
+
+        if (checkedTags.length == 0) {
+            // no tags checked, show all
+            cellSelector = '.cell';
+            wall.unFilter();
+        } else {
+            cellSelector = '.cell.' + checkedTags.join(', .cell.');
+            wall.filter(cellSelector);
+        }
+    });
 
     $('.gallery').on('click', '.cell', function(event) {
         event.preventDefault();
-        openGallery($(this).index());
+        openGallery($(this).data('photo-id'), cellSelector);
     });
 
     // Parse URL and open gallery if it contains #&pid=3&gid=1
     var hashData = photoswipeParseHash();
     if(hashData.pid) {
-        openGallery(hashData.pid);
+        openGallery(hashData.pid, cellSelector);
     }
 });

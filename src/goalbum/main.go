@@ -69,19 +69,21 @@ type photoResult struct {
 }
 
 type Page struct {
-	Title       string
-	Subtitle    string
-	Photos      []*Photo
-	CreatedAt   string
-	Color       string
-	HeadContent string
-	BodyContent string
+	Title        string
+	Subtitle     string
+	Photos       []*Photo
+	CreatedAt    string
+	Color        string
+	HeadContent  string
+	BodyContent  string
+	Tags         map[string]string
+	BuildVersion string
+	BuildTime    string
+	BuildHash    string
 }
 
 func init() {
-	// parse templates
 	var err error
-
 	indexTmpl, err = template.New("index").Parse(string(indexCtmpl))
 
 	if err != nil {
@@ -149,6 +151,8 @@ func main() {
 	}
 
 	sort.Sort(ByCreatedAt(photos))
+	tags := PhotoTags(photos)
+	SetTagNames(photos, tags)
 
 	for _, photo := range photos {
 		photo.SetDefaultCaption()
@@ -186,13 +190,17 @@ func main() {
 
 	w := bufio.NewWriter(f)
 	indexTmpl.Execute(w, Page{
-		Title:       *titleFlag,
-		Subtitle:    *subtitleFlag,
-		Photos:      photos,
-		CreatedAt:   time.Now().Format("Monday, January 2, 2006"),
-		Color:       *colorFlag,
-		HeadContent: *headContentFlag,
-		BodyContent: *bodyContentFlag,
+		Title:        *titleFlag,
+		Subtitle:     *subtitleFlag,
+		Photos:       photos,
+		CreatedAt:    time.Now().Format("Monday, January 2, 2006"),
+		Color:        *colorFlag,
+		HeadContent:  *headContentFlag,
+		BodyContent:  *bodyContentFlag,
+		Tags:         tags,
+		BuildVersion: buildVersion,
+		BuildTime:    buildTime,
+		BuildHash:    buildHash,
 	})
 	w.Flush()
 
@@ -280,11 +288,14 @@ func ResizePhotos(photos []*Photo) {
 	photoCh := make(chan *Photo, concurrency)
 	doneCh := make(chan bool)
 	errCh := make(chan error)
+	progCh := make(chan string)
 	var wg sync.WaitGroup
+
+	numPhotos := len(photos)
 
 	// start the workers
 	for i := 0; i < concurrency; i++ {
-		go ResizeWorker(i, photoCh, doneCh, errCh, &wg)
+		go ResizeWorker(i, photoCh, doneCh, errCh, progCh, &wg)
 	}
 
 	quit := make(chan bool)
@@ -301,6 +312,20 @@ func ResizePhotos(photos []*Photo) {
 		}
 	}(errCh, quit)
 
+	// read from progress channel
+	go func(myProgCh <-chan string, myDoneCh <-chan bool) {
+		var i int = 0
+		for {
+			select {
+			case photo := <-myProgCh:
+				i += 1
+				fmt.Printf("%d / %d - %s\n", i, numPhotos, photo)
+			case <-myDoneCh:
+				return
+			}
+		}
+	}(progCh, quit)
+
 	// send photos into worker pool
 	for _, photo := range photos {
 		wg.Add(1)
@@ -311,13 +336,17 @@ func ResizePhotos(photos []*Photo) {
 	for i := 0; i < concurrency; i++ {
 		doneCh <- true
 	}
+	// errCh
+	quit <- true
+	// progCh
 	quit <- true
 	close(photoCh)
 	close(doneCh)
 	close(errCh)
+	close(progCh)
 }
 
-func ResizeWorker(id int, photoCh <-chan *Photo, doneCh <-chan bool, errCh chan<- error, wg *sync.WaitGroup) {
+func ResizeWorker(id int, photoCh <-chan *Photo, doneCh <-chan bool, errCh chan<- error, progCh chan<- string, wg *sync.WaitGroup) {
 	for {
 		select {
 		case photo := <-photoCh:
@@ -325,6 +354,7 @@ func ResizeWorker(id int, photoCh <-chan *Photo, doneCh <-chan bool, errCh chan<
 			if err != nil {
 				errCh <- err
 			}
+			progCh <- photo.Filename()
 			wg.Done()
 		case <-doneCh:
 			return
@@ -350,8 +380,6 @@ func ResizePhoto(photo *Photo) error {
 	orientation, err := GetOrientation(photo.InPath)
 	if err == nil {
 		FixOrientation(&img, orientation)
-	} else {
-		fmt.Println("orientation error", photo.InPath, err.Error())
 	}
 
 	// write original image

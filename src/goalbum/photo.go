@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"path"
+	"strings"
 	"time"
 )
 
@@ -21,7 +22,12 @@ type Photo struct {
 	Caption        string
 	Author         string
 	Tags           []string
+	TagNames       []string
 	CreatedAt      time.Time
+}
+
+func (photo *Photo) Id() string {
+	return fmt.Sprintf("photo-%s", photo.Md5sum[0:4])
 }
 
 func (photo *Photo) Filename() string {
@@ -54,7 +60,7 @@ func (photo1 *Photo) Update(photo2 *Photo) {
 		photo1.Author = photo2.Author
 	}
 	if len(photo1.Tags) == 0 && len(photo2.Tags) > 0 {
-		photo1.Tags = photos.Tags
+		photo1.Tags = photo2.Tags
 	}
 }
 
@@ -62,6 +68,14 @@ func (photo *Photo) SetDefaultCaption() {
 	if photo.Caption == "" {
 		photo.Caption = fmt.Sprintf("%s: %s", photo.Filename(), photo.CreatedAt.Format("Monday, January 2, 2006 at 3:04pm"))
 	}
+}
+
+func (photo *Photo) TagsStr() string {
+	return strings.Join(photo.Tags, " ")
+}
+
+func (photo *Photo) TagNamesStr() string {
+	return strings.Join(photo.TagNames, " ")
 }
 
 type ByCreatedAt []*Photo
