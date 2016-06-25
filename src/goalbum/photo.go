@@ -8,6 +8,7 @@ import (
 )
 
 type Photo struct {
+	Id             string
 	InPath         string
 	Md5sum         string
 	OriginalPath   string
@@ -24,10 +25,6 @@ type Photo struct {
 	Tags           []string
 	TagNames       []string
 	CreatedAt      time.Time
-}
-
-func (photo *Photo) Id() string {
-	return fmt.Sprintf("photo-%s", photo.Md5sum[0:4])
 }
 
 func (photo *Photo) Filename() string {

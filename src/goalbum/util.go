@@ -233,3 +233,38 @@ func MapKeys(myMap map[string]string) []string {
 
 	return keys
 }
+
+func FindPhotoByMd5sum(photos []*Photo, md5sum string) *Photo {
+	for _, photo := range photos {
+		if photo.Md5sum == md5sum {
+			return photo
+		}
+	}
+	return nil
+}
+
+func SetPhotoIds(photos []*Photo) error {
+	md5sums := []string{}
+	ids := []string{}
+
+	for _, photo := range photos {
+		if SliceContainsString(md5sums, photo.Md5sum) {
+			photo2 := FindPhotoByMd5sum(photos, photo.Md5sum)
+			photo.Id = photo2.Id
+			continue
+		}
+		for i := 1; i < 32; i++ {
+			str := photo.Md5sum[0:i]
+			if !SliceContainsString(ids, str) {
+				photo.Id = fmt.Sprintf("photo-%s", str)
+				ids = append(ids, str)
+				break
+			}
+		}
+		if photo.Id == "" {
+			return fmt.Errorf("Unable to set id for photo %s\n", photo.Filename())
+		}
+	}
+
+	return nil
+}

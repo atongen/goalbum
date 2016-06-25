@@ -153,6 +153,11 @@ func main() {
 	sort.Sort(ByCreatedAt(photos))
 	tags := PhotoTags(photos)
 	SetTagNames(photos, tags)
+	err = SetPhotoIds(photos)
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
 
 	for _, photo := range photos {
 		photo.SetDefaultCaption()
