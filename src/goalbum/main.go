@@ -33,6 +33,7 @@ var (
 	bodyContentFlag = flag.String("body-content", "", "Path to file whose content should be included prior to the closing of the body element")
 	includeFlag     strslice
 	updateFlag      = flag.Bool("update", false, "If output directory is existing gallery, update instead of replace")
+	exiftoolFlag    = flag.String("exiftool", "", "Provide path to exiftool. If empty, PATH will be searched")
 )
 
 var (
@@ -185,6 +186,12 @@ func main() {
 	}
 
 	ResizePhotos(photosToAdd)
+
+	err = WriteOriginalExif(photosToAdd)
+	if err != nil {
+		fmt.Printf("Writing exif tags: %s\n", err.Error())
+		os.Exit(1)
+	}
 
 	f, err := os.Create(path.Join(*outFlag, "index.html"))
 	if err != nil {
@@ -465,4 +472,27 @@ func IndexPhoto(inPath string) (*Photo, error) {
 		ThumbPath:    path.Join(thumbsDirName, filename),
 		CreatedAt:    ImageTimeTaken(absPath),
 	}, nil
+}
+
+func WriteOriginalExif(photos []*Photo) error {
+	exifPath, err := ExiftoolPath(*exiftoolFlag)
+	if err != nil {
+		return err
+	}
+	if exifPath == "" {
+		// exiftool not found
+		return nil
+	}
+	if len(photos) > 0 {
+		fmt.Printf("Updating exif for %d photos...\n", len(photos))
+		for _, photo := range photos {
+			originalPath := path.Join(originalsDir, photo.Filename())
+			out, err := ExifCp(exifPath, photo.InPath, originalPath)
+			if err != nil {
+				fmt.Println(out)
+				return err
+			}
+		}
+	}
+	return nil
 }
