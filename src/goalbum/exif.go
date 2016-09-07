@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -49,7 +48,6 @@ func ExiftoolPathFind() (myPath string, err error) {
 // normalized in the processed images.
 func ExifCp(toolPath, src, dst string) (string, error) {
 	cmd := exec.Command(toolPath, "-overwrite_original_in_place", "-tagsFromFile", src, "-x", "Orientation", dst)
-	fmt.Println(cmd)
 	out, err := cmd.CombinedOutput()
 	return string(out), err
 }
