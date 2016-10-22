@@ -4,6 +4,9 @@
 /bin/*
 !/bin/.gitkeep
 
+/dist/*
+!/dist/.gitkeep
+
 /node_modules
 /assets/build
 

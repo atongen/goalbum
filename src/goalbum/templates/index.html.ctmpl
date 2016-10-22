@@ -48,7 +48,7 @@
 					<div class="gallery" itemscope itemtype="http://schema.org/ImageGallery">
 						{{ range .Photos -}}
             <div data-photo-id="{{.Id}}" class="cell {{.TagNamesStr}}" style="width: {{.ThumbWidth}}px; height: {{.ThumbHeight}}px" data-size="{{.SlideWidth}}x{{.SlideHeight}}" data-msrc="{{.ThumbPath}}" data-original="{{.OriginalPath}}" data-caption="{{.Caption}}" data-author="{{.Author}}" itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject">
-              <a href="{{.OriginalPath}}" style="background-image: url({{.ThumbPath}})" itemprop="contentUrl">
+              <a href="{{.OriginalPath}}" style="background-image: url('{{.ThumbPath}}')" itemprop="contentUrl">
 								{{.Filename}}
 							</a>
 						</div>

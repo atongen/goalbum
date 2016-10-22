@@ -28,12 +28,13 @@ var (
 	maxSlideFlag    = flag.Int("max-slide", 1200, "Maximum pixel dimension of slide images")
 	titleFlag       = flag.String("title", "", "Title of album")
 	subtitleFlag    = flag.String("subtitle", "", "Subtitle of album")
-	colorFlag       = flag.String("color", "blue", "CSS colors to use")
+	colorFlag       = flag.String("color", "blue", "CSS colors to use (http://materializecss.com/color.html#palette)")
 	headContentFlag = flag.String("head-content", "", "Path to file whose content should be included prior to the closing of the head element")
 	bodyContentFlag = flag.String("body-content", "", "Path to file whose content should be included prior to the closing of the body element")
 	includeFlag     strslice
 	updateFlag      = flag.Bool("update", false, "If output directory is existing gallery, update instead of replace")
 	exiftoolFlag    = flag.String("exiftool", "", "Provide path to exiftool. If empty, PATH will be searched")
+	version         = flag.Bool("version", false, "Show the version and exit.")
 )
 
 var (
@@ -97,6 +98,11 @@ func init() {
 
 func main() {
 	flag.Parse()
+
+	if *version {
+		fmt.Printf("goalbum version %s - %s - %s\n", buildVersion, buildHash, buildTime)
+		os.Exit(0)
+	}
 
 	if *inFlag == "" {
 		fmt.Println("in directory is required")
