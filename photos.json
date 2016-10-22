@@ -1,0 +1,498 @@
+[
+    {
+        "Id": "photo-6",
+        "InPath": "/home/atongen/tmp/example/022.jpg",
+        "Md5sum": "61aa461810008e0bb50a62ae39c7c1ee",
+        "OriginalPath": "originals/022.jpg",
+        "OriginalWidth": 1600,
+        "OriginalHeight": 1063,
+        "SlidePath": "slides/022.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 797,
+        "ThumbPath": "thumbs/022.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 199,
+        "Caption": "022.jpg: Monday, October 10, 2016 at 10:33am",
+        "Author": "",
+        "Tags": [
+            "animal",
+            "architecture"
+        ],
+        "TagNames": [
+            "tag-0",
+            "tag-1"
+        ],
+        "CreatedAt": "2016-10-10T10:33:51-05:00"
+    },
+    {
+        "Id": "photo-5",
+        "InPath": "/home/atongen/tmp/example/004.jpg",
+        "Md5sum": "5c57bd7920cc8899b14528bdfd2e6267",
+        "OriginalPath": "originals/004.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1330,
+        "SlidePath": "slides/004.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 779,
+        "ThumbPath": "thumbs/004.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 194,
+        "Caption": "004.jpg: Saturday, October 22, 2016 at 3:05pm",
+        "Author": "",
+        "Tags": [
+            "landscape"
+        ],
+        "TagNames": [
+            "tag-2"
+        ],
+        "CreatedAt": "2016-10-22T15:05:32.55518215-05:00"
+    },
+    {
+        "Id": "photo-f",
+        "InPath": "/home/atongen/tmp/example/006.jpg",
+        "Md5sum": "f107efacbea5caaa02bc5f3435db5408",
+        "OriginalPath": "originals/006.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1367,
+        "SlidePath": "slides/006.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 800,
+        "ThumbPath": "thumbs/006.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 200,
+        "Caption": "006.jpg: Saturday, October 22, 2016 at 3:05pm",
+        "Author": "",
+        "Tags": [
+            "landscape"
+        ],
+        "TagNames": [
+            "tag-2"
+        ],
+        "CreatedAt": "2016-10-22T15:05:39.027058992-05:00"
+    },
+    {
+        "Id": "photo-4",
+        "InPath": "/home/atongen/tmp/example/007.jpg",
+        "Md5sum": "4c330d0640bd1fc8d0f49a13ef236a85",
+        "OriginalPath": "originals/007.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1365,
+        "SlidePath": "slides/007.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 799,
+        "ThumbPath": "thumbs/007.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 199,
+        "Caption": "007.jpg: Saturday, October 22, 2016 at 3:05pm",
+        "Author": "",
+        "Tags": [
+            "landscape"
+        ],
+        "TagNames": [
+            "tag-2"
+        ],
+        "CreatedAt": "2016-10-22T15:05:42.234997947-05:00"
+    },
+    {
+        "Id": "photo-7",
+        "InPath": "/home/atongen/tmp/example/016.jpg",
+        "Md5sum": "7beccafb8a702deff419df5ecdfaae58",
+        "OriginalPath": "originals/016.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1280,
+        "SlidePath": "slides/016.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 750,
+        "ThumbPath": "thumbs/016.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 187,
+        "Caption": "016.jpg: Saturday, October 22, 2016 at 3:06pm",
+        "Author": "",
+        "Tags": [
+            "landscape"
+        ],
+        "TagNames": [
+            "tag-2"
+        ],
+        "CreatedAt": "2016-10-22T15:06:19.478289312-05:00"
+    },
+    {
+        "Id": "photo-75",
+        "InPath": "/home/atongen/tmp/example/018.jpg",
+        "Md5sum": "752d60b4045f2128d2f8c3077108a8a4",
+        "OriginalPath": "originals/018.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1355,
+        "SlidePath": "slides/018.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 793,
+        "ThumbPath": "thumbs/018.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 198,
+        "Caption": "018.jpg: Saturday, October 22, 2016 at 3:06pm",
+        "Author": "",
+        "Tags": [
+            "person",
+            "animal"
+        ],
+        "TagNames": [
+            "tag-3",
+            "tag-0"
+        ],
+        "CreatedAt": "2016-10-22T15:06:30.066087883-05:00"
+    },
+    {
+        "Id": "photo-c",
+        "InPath": "/home/atongen/tmp/example/021.jpg",
+        "Md5sum": "c6457d23ebc88a983d8883c967aba798",
+        "OriginalPath": "originals/021.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1369,
+        "SlidePath": "slides/021.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 802,
+        "ThumbPath": "thumbs/021.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 200,
+        "Caption": "021.jpg: Saturday, October 22, 2016 at 3:06pm",
+        "Author": "",
+        "Tags": null,
+        "TagNames": null,
+        "CreatedAt": "2016-10-22T15:06:47.173762439-05:00"
+    },
+    {
+        "Id": "photo-74",
+        "InPath": "/home/atongen/tmp/example/023.jpg",
+        "Md5sum": "747cc9d123d7f615c3a5c3dee1e5898b",
+        "OriginalPath": "originals/023.jpg",
+        "OriginalWidth": 1367,
+        "OriginalHeight": 2048,
+        "SlidePath": "slides/023.jpg",
+        "SlideWidth": 800,
+        "SlideHeight": 1200,
+        "ThumbPath": "thumbs/023.jpg",
+        "ThumbWidth": 200,
+        "ThumbHeight": 300,
+        "Caption": "023.jpg: Saturday, October 22, 2016 at 3:06pm",
+        "Author": "",
+        "Tags": [
+            "architecture"
+        ],
+        "TagNames": [
+            "tag-1"
+        ],
+        "CreatedAt": "2016-10-22T15:06:59.27353228-05:00"
+    },
+    {
+        "Id": "photo-d",
+        "InPath": "/home/atongen/tmp/example/024.jpg",
+        "Md5sum": "d1a8913bb69bfd47e7f8a65c00d871a9",
+        "OriginalPath": "originals/024.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1367,
+        "SlidePath": "slides/024.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 800,
+        "ThumbPath": "thumbs/024.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 200,
+        "Caption": "024.jpg: Saturday, October 22, 2016 at 3:07pm",
+        "Author": "",
+        "Tags": null,
+        "TagNames": null,
+        "CreatedAt": "2016-10-22T15:07:05.5814123-05:00"
+    },
+    {
+        "Id": "photo-73",
+        "InPath": "/home/atongen/tmp/example/033.jpg",
+        "Md5sum": "737ff5b6272efd668374ff6a08e1640f",
+        "OriginalPath": "originals/033.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1368,
+        "SlidePath": "slides/033.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 801,
+        "ThumbPath": "thumbs/033.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 200,
+        "Caption": "033.jpg: Saturday, October 22, 2016 at 3:08pm",
+        "Author": "",
+        "Tags": [
+            "person"
+        ],
+        "TagNames": [
+            "tag-3"
+        ],
+        "CreatedAt": "2016-10-22T15:08:03.432312119-05:00"
+    },
+    {
+        "Id": "photo-2",
+        "InPath": "/home/atongen/tmp/example/037.jpg",
+        "Md5sum": "2189b28da38987eebbd9da0997e77423",
+        "OriginalPath": "originals/037.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1244,
+        "SlidePath": "slides/037.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 728,
+        "ThumbPath": "thumbs/037.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 182,
+        "Caption": "037.jpg: Saturday, October 22, 2016 at 3:08pm",
+        "Author": "",
+        "Tags": [
+            "animal"
+        ],
+        "TagNames": [
+            "tag-0"
+        ],
+        "CreatedAt": "2016-10-22T15:08:29.947807973-05:00"
+    },
+    {
+        "Id": "photo-a",
+        "InPath": "/home/atongen/tmp/example/039.jpg",
+        "Md5sum": "ae3b5256d77f472f829c9b965222954e",
+        "OriginalPath": "originals/039.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1390,
+        "SlidePath": "slides/039.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 814,
+        "ThumbPath": "thumbs/039.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 203,
+        "Caption": "039.jpg: Saturday, October 22, 2016 at 3:09pm",
+        "Author": "",
+        "Tags": [
+            "landscape"
+        ],
+        "TagNames": [
+            "tag-2"
+        ],
+        "CreatedAt": "2016-10-22T15:09:25.222757244-05:00"
+    },
+    {
+        "Id": "photo-0",
+        "InPath": "/home/atongen/tmp/example/040.jpg",
+        "Md5sum": "02cec21f0284e9da6d4fee6814476a8a",
+        "OriginalPath": "originals/040.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1365,
+        "SlidePath": "slides/040.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 799,
+        "ThumbPath": "thumbs/040.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 199,
+        "Caption": "040.jpg: Saturday, October 22, 2016 at 3:09pm",
+        "Author": "",
+        "Tags": [
+            "person"
+        ],
+        "TagNames": [
+            "tag-3"
+        ],
+        "CreatedAt": "2016-10-22T15:09:33.126607024-05:00"
+    },
+    {
+        "Id": "photo-50",
+        "InPath": "/home/atongen/tmp/example/047.jpg",
+        "Md5sum": "5068d9e2c73374a3b29ae41b777e6b7b",
+        "OriginalPath": "originals/047.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1191,
+        "SlidePath": "slides/047.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 697,
+        "ThumbPath": "thumbs/047.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 174,
+        "Caption": "047.jpg: Saturday, October 22, 2016 at 3:10pm",
+        "Author": "",
+        "Tags": [
+            "landscape"
+        ],
+        "TagNames": [
+            "tag-2"
+        ],
+        "CreatedAt": "2016-10-22T15:10:32.193484595-05:00"
+    },
+    {
+        "Id": "photo-2a",
+        "InPath": "/home/atongen/tmp/example/048.jpg",
+        "Md5sum": "2a7b4ca310969fb353db0a1bf12ffb6d",
+        "OriginalPath": "originals/048.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1240,
+        "SlidePath": "slides/048.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 726,
+        "ThumbPath": "thumbs/048.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 181,
+        "Caption": "048.jpg: Saturday, October 22, 2016 at 3:10pm",
+        "Author": "",
+        "Tags": [
+            "animal",
+            "architecture"
+        ],
+        "TagNames": [
+            "tag-0",
+            "tag-1"
+        ],
+        "CreatedAt": "2016-10-22T15:10:39.677342405-05:00"
+    },
+    {
+        "Id": "photo-53",
+        "InPath": "/home/atongen/tmp/example/049.jpg",
+        "Md5sum": "533e5eb50a0fb34b0158b10e33093417",
+        "OriginalPath": "originals/049.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1536,
+        "SlidePath": "slides/049.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 900,
+        "ThumbPath": "thumbs/049.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 225,
+        "Caption": "049.jpg: Saturday, October 22, 2016 at 3:10pm",
+        "Author": "",
+        "Tags": [
+            "person"
+        ],
+        "TagNames": [
+            "tag-3"
+        ],
+        "CreatedAt": "2016-10-22T15:10:48.005184187-05:00"
+    },
+    {
+        "Id": "photo-a7",
+        "InPath": "/home/atongen/tmp/example/053.jpg",
+        "Md5sum": "a7d174aa789827a626418da87538d818",
+        "OriginalPath": "originals/053.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1152,
+        "SlidePath": "slides/053.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 675,
+        "ThumbPath": "thumbs/053.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 168,
+        "Caption": "053.jpg: Saturday, October 22, 2016 at 3:11pm",
+        "Author": "",
+        "Tags": null,
+        "TagNames": null,
+        "CreatedAt": "2016-10-22T15:11:22.480529272-05:00"
+    },
+    {
+        "Id": "photo-b",
+        "InPath": "/home/atongen/tmp/example/055.jpg",
+        "Md5sum": "be28e8def8b68ddc2d0a7d110c77f4af",
+        "OriginalPath": "originals/055.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1347,
+        "SlidePath": "slides/055.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 789,
+        "ThumbPath": "thumbs/055.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 197,
+        "Caption": "055.jpg: Saturday, October 22, 2016 at 3:11pm",
+        "Author": "",
+        "Tags": null,
+        "TagNames": null,
+        "CreatedAt": "2016-10-22T15:11:39.076214053-05:00"
+    },
+    {
+        "Id": "photo-a74",
+        "InPath": "/home/atongen/tmp/example/061.jpg",
+        "Md5sum": "a748336b5b844237e418dbdd445dd8cb",
+        "OriginalPath": "originals/061.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1178,
+        "SlidePath": "slides/061.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 690,
+        "ThumbPath": "thumbs/061.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 172,
+        "Caption": "061.jpg: Saturday, October 22, 2016 at 3:12pm",
+        "Author": "",
+        "Tags": [
+            "person"
+        ],
+        "TagNames": [
+            "tag-3"
+        ],
+        "CreatedAt": "2016-10-22T15:12:35.763137531-05:00"
+    },
+    {
+        "Id": "photo-8",
+        "InPath": "/home/atongen/tmp/example/062.jpg",
+        "Md5sum": "814ce3a301f59cb01dec5d2cefb1d238",
+        "OriginalPath": "originals/062.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1365,
+        "SlidePath": "slides/062.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 799,
+        "ThumbPath": "thumbs/062.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 199,
+        "Caption": "062.jpg: Saturday, October 22, 2016 at 3:12pm",
+        "Author": "",
+        "Tags": [
+            "animal"
+        ],
+        "TagNames": [
+            "tag-0"
+        ],
+        "CreatedAt": "2016-10-22T15:12:45.722948421-05:00"
+    },
+    {
+        "Id": "photo-1",
+        "InPath": "/home/atongen/tmp/example/063.jpg",
+        "Md5sum": "1825b88b9ca5c49d3179b42d148014dd",
+        "OriginalPath": "originals/063.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1365,
+        "SlidePath": "slides/063.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 799,
+        "ThumbPath": "thumbs/063.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 199,
+        "Caption": "063.jpg: Saturday, October 22, 2016 at 3:12pm",
+        "Author": "",
+        "Tags": [
+            "animal"
+        ],
+        "TagNames": [
+            "tag-0"
+        ],
+        "CreatedAt": "2016-10-22T15:12:55.942754382-05:00"
+    },
+    {
+        "Id": "photo-80",
+        "InPath": "/home/atongen/tmp/example/065.jpg",
+        "Md5sum": "805c9b88daa484f60e6299d1d0c0c19c",
+        "OriginalPath": "originals/065.jpg",
+        "OriginalWidth": 2048,
+        "OriginalHeight": 1517,
+        "SlidePath": "slides/065.jpg",
+        "SlideWidth": 1200,
+        "SlideHeight": 888,
+        "ThumbPath": "thumbs/065.jpg",
+        "ThumbWidth": 300,
+        "ThumbHeight": 222,
+        "Caption": "065.jpg: Saturday, October 22, 2016 at 3:13pm",
+        "Author": "",
+        "Tags": [
+            "animal"
+        ],
+        "TagNames": [
+            "tag-0"
+        ],
+        "CreatedAt": "2016-10-22T15:13:17.526344617-05:00"
+    }
+]
