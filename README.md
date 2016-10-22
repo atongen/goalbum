@@ -1,8 +1,10 @@
 # goalbum
 
-Build stand-alone html image galleries, from images on your hard drive.
+Build stand-alone, responsive image galleries for the web, from images on your hard drive.
 
 This is basically a re-write of [rpa](https://github.com/atongen/rpa) in golang.
+Uses [photoswipe](http://photoswipe.com/) and [freewall](http://vnjs.net/www/project/freewall/) for dynamic image display.
+All assets are compiled into the binary, so there is always only one file required for installation.
 
 ## Example
 
