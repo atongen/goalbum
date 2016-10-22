@@ -8,7 +8,7 @@ All assets are compiled into the binary, so there is always only one file requir
 
 ## Example
 
-http://atongen.github.io/goalbum
+https://www.andrewtongen.net/goalbum/
 
 ## Installation
 
