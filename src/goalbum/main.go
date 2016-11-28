@@ -94,6 +94,19 @@ func init() {
 	}
 
 	flag.Var(&includeFlag, "include", "File to include in document root of gallery")
+
+	// validate static assets are present
+	missing := []string{}
+	for _, s := range staticAssets {
+		_, err := Asset(s)
+		if err != nil {
+			missing = append(missing, s)
+		}
+	}
+	if len(missing) > 0 {
+		fmt.Printf("Static assets missing:\n%s\n", strings.Join(missing, "\n"))
+		os.Exit(1)
+	}
 }
 
 func main() {
