@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-//go:generate go-bindata -pkg $GOPACKAGE -o assets.go -prefix "templates/" templates/ templates/js/ templates/css/ templates/css/default-skin/ templates/font/ templates/fonts/ templates/font/material-design-icons/ templates/font/roboto/ templates/fonts/roboto/
+//go:generate go-bindata -pkg $GOPACKAGE -o assets.go -prefix "templates/" templates/ templates/js/ templates/css/ templates/css/default-skin/ templates/fonts/ templates/fonts/roboto/
 
 var (
 	staticAssets = []string{

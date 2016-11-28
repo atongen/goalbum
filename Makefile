@@ -7,7 +7,7 @@ OS=linux darwin
 
 LDFLAGS := -ldflags "-X 'main.buildTime=$(BUILD_TIME)' -X 'main.buildUser=$(BUILD_USER)' -X 'main.buildHash=$(BUILD_HASH)' -X 'main.buildVersion=$(VERSION)'"
 
-all: deps test assets generate build
+all: deps assets generate test build
 
 clean:
 	rm -rf bin/* pkg/*
@@ -16,9 +16,6 @@ deps:
 	go get -u github.com/constabulary/gb/...
 	go get -u github.com/jteeuwen/go-bindata/...
 
-test: deps
-	gb test all
-
 assets: deps
 	npm install
 	grunt --env=production
@@ -26,7 +23,10 @@ assets: deps
 generate: assets
 	gb generate goalbum
 
-build: generate test
+test: generate
+	gb test all
+
+build: test
 	gb build ${LDFLAGS} all
 
 distclean:
